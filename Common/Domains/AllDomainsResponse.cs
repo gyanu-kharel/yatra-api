@@ -1,0 +1,1 @@
+public record AllDomainsResponse(Guid Id, string Name);

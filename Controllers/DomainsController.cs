@@ -1,14 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using YatraBackend.Database;
 
 namespace YatraBackend.Controllers;
 
 [ApiController]
 [Route("api/domains")]
-public class DomainsController() : ControllerBase
+public class DomainsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet("")]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok("ok");
+        var domains = await dbContext
+        .Domains
+        .Select(x => new AllDomainsResponse(x.Id, x.Name))
+        .ToListAsync();
+
+        return Ok(domains);
     }
 }
