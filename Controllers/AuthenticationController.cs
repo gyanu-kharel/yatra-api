@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YatraBackend.Common.Authentication;
@@ -6,6 +5,7 @@ using YatraBackend.Common.Constants;
 using YatraBackend.Database;
 using YatraBackend.Database.Models;
 using YatraBackend.Services.Interfaces;
+using YatraBackend.Common.Exceptions;
 
 namespace YatraBackend.Controllers;
 
@@ -22,7 +22,7 @@ public class AuthenticationController(
     {
         var existingEmail = await dbContext
             .Users
-            .FirstOrDefaultAsync(x => x.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(x => x.Email.ToLower().Equals(request.Email.ToLower()));
 
         if (existingEmail is not null)
             throw new ValidationException("Email already exists");
@@ -45,6 +45,7 @@ public class AuthenticationController(
         user.Salt = hashResult.Item2;
 
         await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
         
         var token = jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Email);
 
@@ -60,7 +61,7 @@ public class AuthenticationController(
     {
         var user = await dbContext
             .Users
-            .FirstOrDefaultAsync(x => x.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(x => x.Email.ToLower().Equals(request.Email.ToLower()));
 
         if (user is null)
             throw new ValidationException("Incorrect credentials");

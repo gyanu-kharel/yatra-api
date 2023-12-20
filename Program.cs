@@ -6,6 +6,16 @@ using YatraBackend.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("allow-all-policy", policy =>
+        {
+            policy
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin();
+        });
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -43,7 +53,9 @@ if ((await db.Database.GetPendingMigrationsAsync()).Any())
     Console.WriteLine("Pending migrations applied.");
 }
 
+app.UseExceptionHandler("/error");
 app.UseHttpsRedirection();
+app.UseCors("allow-all-policy");
 app.MapControllers();
 
 app.Run();
