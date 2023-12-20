@@ -8,6 +8,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Domain> Domains => Set<Domain>();
     
     
     // seeding pre-required data to the database
@@ -19,17 +20,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             new Role { Name = "User", Description = "Basic user roles and permissions" }
         );
 
-        // modelBuilder.Entity<Field>().HasData(
-        //     new Field { Name = "Health" },
-        //     new Field { Name = "Education" },
-        //     new Field { Name = "Tourism" },
-        //     new Field { Name = "Transport" },
-        //     new Field { Name = "Finance" },
-        //     new Field { Name = "Agriculture" },
-        //     new Field { Name = "Fashion" },
-        //     new Field { Name = "Social Media" },
-        //     new Field { Name = "E-commerce" }
-        // );
+        modelBuilder.Entity<Domain>().HasData(
+            new Domain { Name = "Health" },
+            new Domain { Name = "Education" },
+            new Domain { Name = "Tourism" },
+            new Domain { Name = "Transport" },
+            new Domain { Name = "Finance" },
+            new Domain { Name = "Agriculture" },
+            new Domain { Name = "Fashion" },
+            new Domain { Name = "Social Media" },
+            new Domain { Name = "E-commerce" }
+        );
 
         base.OnModelCreating(modelBuilder);
     }
