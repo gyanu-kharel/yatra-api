@@ -31,6 +31,7 @@ builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
 //Register IOptions here
 builder.Services.Configure<JwtConfigs>(builder.Configuration.GetSection(JwtConfigs.SectionName));
+builder.Services.Configure<OpenAiConfigs>(builder.Configuration.GetSection(OpenAiConfigs.SectionName));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
