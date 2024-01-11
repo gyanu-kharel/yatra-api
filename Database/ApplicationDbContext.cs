@@ -9,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Domain> Domains => Set<Domain>();
+    public DbSet<Project> Projects => Set<Project>();
     
     
     // seeding pre-required data to the database

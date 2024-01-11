@@ -41,6 +41,30 @@ namespace YatraBackend.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    DomainId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Duration = table.Column<int>(type: "integer", nullable: false),
+                    TeamSize = table.Column<int>(type: "integer", nullable: false),
+                    SkillLevel = table.Column<string>(type: "text", nullable: false),
+                    Complexity = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Projects_Domains_DomainId",
+                        column: x => x.DomainId,
+                        principalTable: "Domains",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -68,15 +92,15 @@ namespace YatraBackend.Database.Migrations
                 columns: new[] { "Id", "IsActive", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("226baf74-100f-4b9f-b35f-f02d8e73c4f3"), true, "Transport" },
-                    { new Guid("441eb000-ab2b-4c91-a398-35445f094428"), true, "Finance" },
-                    { new Guid("8473dc88-ec14-4286-b65f-8ffcd88f1edb"), true, "Tourism" },
-                    { new Guid("881ac600-7b21-4b32-bbd1-8b70b6854384"), true, "Social Media" },
-                    { new Guid("8a0e1887-9764-4258-89a2-1ff35f98d4a2"), true, "E-commerce" },
-                    { new Guid("a8f34d64-1816-4b81-90cf-36a3219d95ed"), true, "Health" },
-                    { new Guid("bfdce290-a7f7-4273-a234-f732e2c02a3f"), true, "Education" },
-                    { new Guid("d16268bb-897d-48a3-937a-e48d1439a872"), true, "Fashion" },
-                    { new Guid("d4c548c3-e6de-4014-b44f-c599a48cc49a"), true, "Agriculture" }
+                    { new Guid("0a8a1a17-93ed-4b30-b808-a1b7a225df79"), true, "Social Media" },
+                    { new Guid("0d9c2863-4e37-4a65-a272-d0f6759aad4c"), true, "Tourism" },
+                    { new Guid("2b88f527-f16c-4fd2-93e1-84acd0a23ac9"), true, "Transport" },
+                    { new Guid("32895017-3322-4cc3-9096-9f0caca309e7"), true, "Fashion" },
+                    { new Guid("a1b77823-c40d-4b0f-a5ca-97e1311bee94"), true, "Education" },
+                    { new Guid("a9e640b0-2714-4353-a446-3cd88c242e99"), true, "Agriculture" },
+                    { new Guid("d9583080-622f-4916-b485-5855d8360f36"), true, "E-commerce" },
+                    { new Guid("dc492a99-ffe4-4510-a91d-67a4ba6a3315"), true, "Finance" },
+                    { new Guid("de3406c6-df56-4033-9336-4e3f4331aad1"), true, "Health" }
                 });
 
             migrationBuilder.InsertData(
@@ -84,9 +108,14 @@ namespace YatraBackend.Database.Migrations
                 columns: new[] { "Id", "Description", "IsActive", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("2b019de2-ff60-4830-8f10-b3a78c313308"), "Administrative roles and permissions", true, "Admin" },
-                    { new Guid("ec8c2dc7-2302-4619-8ad7-1b320b7f3575"), "Basic user roles and permissions", true, "User" }
+                    { new Guid("5f4e1d34-1e86-4f6e-9e3d-7c91349a7107"), "Basic user roles and permissions", true, "User" },
+                    { new Guid("e3093c9a-769a-4bfd-bcb1-d39a0e6a61fe"), "Administrative roles and permissions", true, "Admin" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_DomainId",
+                table: "Projects",
+                column: "DomainId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
@@ -98,10 +127,13 @@ namespace YatraBackend.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Domains");
+                name: "Projects");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Domains");
 
             migrationBuilder.DropTable(
                 name: "Roles");
