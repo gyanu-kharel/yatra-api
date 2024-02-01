@@ -12,7 +12,7 @@ using YatraBackend.Database;
 namespace YatraBackend.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240111172957_Init")]
+    [Migration("20240130214509_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -45,55 +45,55 @@ namespace YatraBackend.Database.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("de3406c6-df56-4033-9336-4e3f4331aad1"),
+                            Id = new Guid("aca6b343-7dae-43aa-85f3-445a7662d83f"),
                             IsActive = true,
                             Name = "Health"
                         },
                         new
                         {
-                            Id = new Guid("a1b77823-c40d-4b0f-a5ca-97e1311bee94"),
+                            Id = new Guid("5d357423-6ec7-46db-b00f-a7836faea383"),
                             IsActive = true,
                             Name = "Education"
                         },
                         new
                         {
-                            Id = new Guid("0d9c2863-4e37-4a65-a272-d0f6759aad4c"),
+                            Id = new Guid("2bc7c2c6-1ce9-456f-babe-a2d15167a61b"),
                             IsActive = true,
                             Name = "Tourism"
                         },
                         new
                         {
-                            Id = new Guid("2b88f527-f16c-4fd2-93e1-84acd0a23ac9"),
+                            Id = new Guid("2e144030-dd76-4a74-9939-f968d7a0adce"),
                             IsActive = true,
                             Name = "Transport"
                         },
                         new
                         {
-                            Id = new Guid("dc492a99-ffe4-4510-a91d-67a4ba6a3315"),
+                            Id = new Guid("10d95da0-8c5f-4492-93b0-f6197d33b8d3"),
                             IsActive = true,
                             Name = "Finance"
                         },
                         new
                         {
-                            Id = new Guid("a9e640b0-2714-4353-a446-3cd88c242e99"),
+                            Id = new Guid("3a612668-ab68-4412-beb5-997b478b2af2"),
                             IsActive = true,
                             Name = "Agriculture"
                         },
                         new
                         {
-                            Id = new Guid("32895017-3322-4cc3-9096-9f0caca309e7"),
+                            Id = new Guid("e1cadd03-621e-449b-954b-bdfa71641d0e"),
                             IsActive = true,
                             Name = "Fashion"
                         },
                         new
                         {
-                            Id = new Guid("0a8a1a17-93ed-4b30-b808-a1b7a225df79"),
+                            Id = new Guid("c601c6b7-ed15-4e0a-8ad8-cc2df97a44de"),
                             IsActive = true,
                             Name = "Social Media"
                         },
                         new
                         {
-                            Id = new Guid("d9583080-622f-4916-b485-5855d8360f36"),
+                            Id = new Guid("6994e20c-feb0-4ad1-af9d-dbd1f6386f16"),
                             IsActive = true,
                             Name = "E-commerce"
                         });
@@ -113,11 +113,27 @@ namespace YatraBackend.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DocumentationUrl")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("DomainId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
+
+                    b.Property<string>("GithubLink")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ProjectYear")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ScreenshotUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("SkillLevel")
                         .IsRequired()
@@ -130,9 +146,17 @@ namespace YatraBackend.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("UiDesignLink")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DomainId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Projects");
                 });
@@ -161,14 +185,14 @@ namespace YatraBackend.Database.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e3093c9a-769a-4bfd-bcb1-d39a0e6a61fe"),
+                            Id = new Guid("5fcdab01-4ebf-4899-87ef-43a4014abf50"),
                             Description = "Administrative roles and permissions",
                             IsActive = true,
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("5f4e1d34-1e86-4f6e-9e3d-7c91349a7107"),
+                            Id = new Guid("34a258fb-29c7-4cb2-a8ff-8d87f5790479"),
                             Description = "Basic user roles and permissions",
                             IsActive = true,
                             Name = "User"
@@ -218,7 +242,15 @@ namespace YatraBackend.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("YatraBackend.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Domain");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("YatraBackend.Database.Models.User", b =>

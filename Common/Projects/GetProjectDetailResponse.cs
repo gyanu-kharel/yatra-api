@@ -1,15 +1,14 @@
-namespace YatraBackend.Common.Projects;
+﻿namespace YatraBackend.Common.Projects;
 
-public record CreateProjectRequest(
+public record GetProjectDetailResponse(
+    Guid Id,
     string Title,
     string Description,
     Guid DomainId,
+    string Domain,
     int Duration,
     int TeamSize,
     string SkillLevel,
     string Complexity,
     DateTime ProjectYear,
-    string Platform,
-    string? UiDesignLink,
-    string? GithubLink,
-    Guid CreatedBy);
+    string Owner);
