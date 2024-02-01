@@ -101,4 +101,18 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
             
         return Ok(project);
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var project = await dbContext.Projects
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (project is null) return BadRequest();
+        
+        dbContext.Projects.Remove(project);
+        await dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
 }
