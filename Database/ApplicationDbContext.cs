@@ -10,7 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Domain> Domains => Set<Domain>();
     public DbSet<Project> Projects => Set<Project>();
-    
+    public DbSet<Metadata> Metadatas => Set<Metadata>();
     
     // seeding pre-required data to the database
     // these data will be available whenever the database is created without having user to add them manually

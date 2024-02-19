@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using YatraBackend.Common.Projects;
 using YatraBackend.Database;
 using YatraBackend.Database.Models;
+using YatraBackend.Services;
 
 namespace YatraBackend.Controllers;
 
@@ -49,15 +50,24 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
             GithubLink = request.GithubLink,
             UserId = request.CreatedBy
         };
-        try
+
+        var domain = await dbContext.Domains
+            .FirstOrDefaultAsync(x => x.Id == request.DomainId);
+
+        var filteredKeywords = MLHelper.FilterKeywords(request.Description, domain.Metadata);
+        
+        await dbContext.Projects.AddAsync(project);
+        await dbContext.SaveChangesAsync();
+
+        var metaData = new Metadata()
         {
-            await dbContext.Projects.AddAsync(project);
-            await dbContext.SaveChangesAsync();
-        }
-        catch (Exception exc)
-        {
-            Console.WriteLine(exc.Message);
-        }
+            Id = project.Id,
+            Content = filteredKeywords.ToList()
+        };
+
+        await dbContext.Metadatas.AddAsync(metaData);
+        await dbContext.SaveChangesAsync();
+            
         return Ok(project.Id);
     }
 
@@ -82,6 +92,8 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetDetail(Guid id)
     {
+        var result = new GetRecommendationsResponse();
+        
         var project = await dbContext.Projects
             .Where(x => x.Id == id)
             .Select(y => new GetProjectDetailResponse(
@@ -98,8 +110,36 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
                 y.User.FullName
             ))
             .FirstOrDefaultAsync();
-            
-        return Ok(project);
+        
+        result.Data = project;
+        
+        var query = await dbContext.Metadatas
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        var metadata = await dbContext.Metadatas
+            .Where(x => x.Id != id)
+            .ToListAsync();
+        var recommendationIds = MLHelper.Recommend(query, metadata).Select(x => x.Id);
+
+        var recommendations = await dbContext.Projects
+            .Where(x => recommendationIds.Contains(x.Id))
+            .Select(y => new GetProjectDetailResponse(
+                y.Id,
+                y.Title,
+                y.Description,
+                y.DomainId,
+                y.Domain.Name,
+                y.Duration,
+                y.TeamSize,
+                y.SkillLevel,
+                y.Complexity,
+                y.ProjectYear,
+                y.User.FullName
+            ))
+            .ToListAsync();
+
+        result.Recommendations = recommendations;
+        return Ok(result);
     }
 
     [HttpDelete("{id:guid}")]

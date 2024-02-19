@@ -28,7 +28,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
-
 //Register IOptions here
 builder.Services.Configure<JwtConfigs>(builder.Configuration.GetSection(JwtConfigs.SectionName));
 builder.Services.Configure<OpenAiConfigs>(builder.Configuration.GetSection(OpenAiConfigs.SectionName));

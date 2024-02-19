@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -19,11 +20,24 @@ namespace YatraBackend.Database.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    Metadata = table.Column<List<string>>(type: "text[]", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Domains", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Metadatas",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Content = table.Column<List<string>>(type: "text[]", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Metadatas", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,18 +116,18 @@ namespace YatraBackend.Database.Migrations
 
             migrationBuilder.InsertData(
                 table: "Domains",
-                columns: new[] { "Id", "IsActive", "Name" },
+                columns: new[] { "Id", "IsActive", "Metadata", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("10d95da0-8c5f-4492-93b0-f6197d33b8d3"), true, "Finance" },
-                    { new Guid("2bc7c2c6-1ce9-456f-babe-a2d15167a61b"), true, "Tourism" },
-                    { new Guid("2e144030-dd76-4a74-9939-f968d7a0adce"), true, "Transport" },
-                    { new Guid("3a612668-ab68-4412-beb5-997b478b2af2"), true, "Agriculture" },
-                    { new Guid("5d357423-6ec7-46db-b00f-a7836faea383"), true, "Education" },
-                    { new Guid("6994e20c-feb0-4ad1-af9d-dbd1f6386f16"), true, "E-commerce" },
-                    { new Guid("aca6b343-7dae-43aa-85f3-445a7662d83f"), true, "Health" },
-                    { new Guid("c601c6b7-ed15-4e0a-8ad8-cc2df97a44de"), true, "Social Media" },
-                    { new Guid("e1cadd03-621e-449b-954b-bdfa71641d0e"), true, "Fashion" }
+                    { new Guid("3070f531-5ebe-4866-a39f-2ed32a67bde3"), true, null, "Social Media" },
+                    { new Guid("6352345f-8221-4a63-ba27-fb63f4e23689"), true, null, "Tourism" },
+                    { new Guid("66f1e987-4540-472b-a5f9-f6744ee80bc8"), true, null, "Education" },
+                    { new Guid("8e533198-16ac-429e-abfc-da7ae8985874"), true, null, "Fashion" },
+                    { new Guid("905f119b-1d1e-4376-8a36-2ce2c0e13f1f"), true, null, "Transport" },
+                    { new Guid("ae234319-0725-48fb-9384-727745ec9e36"), true, null, "E-commerce" },
+                    { new Guid("af5227d2-3a65-465f-a6d8-715d13d16248"), true, null, "Finance" },
+                    { new Guid("c0441395-773d-4bfd-8130-cc41723b2593"), true, null, "Health" },
+                    { new Guid("e9db752a-5419-4634-b2af-9ddb990668bf"), true, null, "Agriculture" }
                 });
 
             migrationBuilder.InsertData(
@@ -121,8 +135,8 @@ namespace YatraBackend.Database.Migrations
                 columns: new[] { "Id", "Description", "IsActive", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("34a258fb-29c7-4cb2-a8ff-8d87f5790479"), "Basic user roles and permissions", true, "User" },
-                    { new Guid("5fcdab01-4ebf-4899-87ef-43a4014abf50"), "Administrative roles and permissions", true, "Admin" }
+                    { new Guid("6f324299-f21f-4fc6-aa95-7b12180b29a1"), "Basic user roles and permissions", true, "User" },
+                    { new Guid("e0a7c8fe-6a9a-4935-9ef9-80b8c01e8b2c"), "Administrative roles and permissions", true, "Admin" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -144,6 +158,9 @@ namespace YatraBackend.Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Metadatas");
+
             migrationBuilder.DropTable(
                 name: "Projects");
 
