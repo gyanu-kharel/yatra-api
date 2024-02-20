@@ -8,4 +8,7 @@ public record GetProjectResponse(
     int Duration,
     int TeamSize,
     string SkillLevel,
-    string Complexity);
+    string Complexity,
+    int FavoriteCount,
+    int ViewCount,
+    bool? IsFavorite);

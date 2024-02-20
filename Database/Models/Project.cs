@@ -18,6 +18,8 @@ public class Project
     public string? ScreenshotUrl { get; set; }
     
     public string? DocumentationUrl { get; set; }
+    public int FavoriteCount { get; set; }
+    public int ViewCount { get; set; }
     
     public Guid UserId { get; set; }
     

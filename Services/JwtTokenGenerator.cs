@@ -35,4 +35,13 @@ public class JwtTokenGenerator(IOptions<JwtConfigs> jwtConfigs) : IJwtTokenGener
 
         return new JwtSecurityTokenHandler().WriteToken(securityToken);
     }
+
+    public Guid ParseToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        var userId = jwtToken.Claims.First(claim => claim.Type == "jti").Value;
+        
+        return Guid.Parse(userId);
+    }
 }

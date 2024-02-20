@@ -5,4 +5,6 @@ public record GetLatestProjectResponse(
     string Domain,
     string Title,
     DateTime ProjectYear,
-    string Owner);
+    string Owner,
+    int FavoriteCount,
+    int ViewCount);

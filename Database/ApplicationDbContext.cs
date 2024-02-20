@@ -11,11 +11,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Domain> Domains => Set<Domain>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Metadata> Metadatas => Set<Metadata>();
+    public DbSet<UserFavorite> UserFavorites => Set<UserFavorite>();
     
     // seeding pre-required data to the database
     // these data will be available whenever the database is created without having user to add them manually
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<UserFavorite>()
+            .HasKey(c => new { c.UserId, c.ProjectId });
+        
         modelBuilder.Entity<Role>().HasData(
             new Role { Name = "Admin", Description = "Administrative roles and permissions" },
             new Role { Name = "User", Description = "Basic user roles and permissions" }

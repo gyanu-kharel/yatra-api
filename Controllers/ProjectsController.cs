@@ -4,16 +4,23 @@ using YatraBackend.Common.Projects;
 using YatraBackend.Database;
 using YatraBackend.Database.Models;
 using YatraBackend.Services;
+using YatraBackend.Services.Interfaces;
 
 namespace YatraBackend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
+public class ProjectsController(ApplicationDbContext dbContext, IJwtTokenGenerator jwtTokenGenerator) : ControllerBase
 {
     [HttpGet("")]
     public async Task<IActionResult> GetAll()
     {
+        var token =  Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        if (token is null)
+            return BadRequest();
+
+        var userId = jwtTokenGenerator.ParseToken(token);
+        
         var projects = await dbContext.Projects
             .Select(x => new GetProjectResponse(
                     x.Id,
@@ -23,12 +30,32 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
                     x.Duration,
                     x.TeamSize,
                     x.SkillLevel,
-                    x.Complexity
+                    x.Complexity,
+                    x.FavoriteCount,
+                    x.ViewCount,
+                    null
                 )
             )
             .ToListAsync();
 
-        return Ok(projects);
+        var userFavs = await dbContext.UserFavorites
+            .Where(x => x.UserId == userId)
+            .Select(y => y.ProjectId)
+            .ToListAsync();
+
+        var result = new List<GetProjectResponse>();
+        foreach (var project in projects)
+        {
+            if (userFavs.Contains(project.Id))
+            {
+                result.Add(project with {IsFavorite = true});
+            }
+            else
+            {
+                result.Add((project with {IsFavorite = false}));
+            }
+        }
+        return Ok(result);
     }
 
     [HttpPost("")]
@@ -73,7 +100,7 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
 
     [HttpGet("latest")]
     public async Task<IActionResult> GetLatest()
-    {
+    {   
         var latest = await dbContext
             .Projects
             .OrderByDescending(x => x.ProjectYear)
@@ -82,36 +109,44 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
                 y.Domain.Name,
                 y.Title,
                 y.ProjectYear,
-                y.User.FullName))
+                y.User.FullName,
+                y.FavoriteCount,
+                y.ViewCount)
+            )
             .Take(5)
             .ToListAsync();
-
+        
+       
         return Ok(latest);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetDetail(Guid id)
-    {
+    {  
+        var token =  Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        if (token is null)
+            return BadRequest();
+
+        var userId = jwtTokenGenerator.ParseToken(token);
         var result = new GetRecommendationsResponse();
         
         var project = await dbContext.Projects
             .Where(x => x.Id == id)
-            .Select(y => new GetProjectDetailResponse(
-                y.Id,
-                y.Title,
-                y.Description,
-                y.DomainId,
-                y.Domain.Name,
-                y.Duration,
-                y.TeamSize,
-                y.SkillLevel,
-                y.Complexity,
-                y.ProjectYear,
-                y.User.FullName
-            ))
+            .Include(x => x.Domain)
             .FirstOrDefaultAsync();
-        
-        result.Data = project;
+
+        var userFav = await dbContext.UserFavorites
+            .Where(x => x.UserId == userId && x.ProjectId == project.Id)
+            .ToListAsync();
+
+        result.Data = new GetProjectDetailResponse(project);
+
+        result.Data.IsFavorite = userFav.Count > 0;
+
+        project.ViewCount += 1;
+
+        dbContext.Projects.Update(project);
+        await dbContext.SaveChangesAsync();
         
         var query = await dbContext.Metadatas
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -123,19 +158,7 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
 
         var recommendations = await dbContext.Projects
             .Where(x => recommendationIds.Contains(x.Id))
-            .Select(y => new GetProjectDetailResponse(
-                y.Id,
-                y.Title,
-                y.Description,
-                y.DomainId,
-                y.Domain.Name,
-                y.Duration,
-                y.TeamSize,
-                y.SkillLevel,
-                y.Complexity,
-                y.ProjectYear,
-                y.User.FullName
-            ))
+            .Select(y => new GetProjectDetailResponse(y))
             .ToListAsync();
 
         result.Recommendations = recommendations;
@@ -154,5 +177,64 @@ public class ProjectsController(ApplicationDbContext dbContext) : ControllerBase
         await dbContext.SaveChangesAsync();
 
         return Ok();
+    }
+
+    [HttpPost("favorite/{id:guid}")]
+    public async Task<IActionResult> Favorite(Guid id)
+    {
+        var token =  Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        if (token is null)
+            return BadRequest();
+
+        var userId = jwtTokenGenerator.ParseToken(token);
+
+        var project = await dbContext.Projects
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        var isFavorited = (await dbContext.UserFavorites
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.ProjectId == id))!;
+
+        if (isFavorited is null)
+        {
+            var userFav = new UserFavorite()
+            {
+                UserId = userId,
+                ProjectId = id,
+                Date = DateTime.Now.ToUniversalTime()
+            };
+
+            project.FavoriteCount += 1;
+            dbContext.UserFavorites.Add(userFav);
+            dbContext.Projects.Update(project);
+        }
+        else
+        {
+            project.FavoriteCount -= 1;
+            dbContext.UserFavorites.Remove(isFavorited);
+        }
+        
+        await dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Popular()
+    {
+        var popular = await dbContext
+            .Projects
+            .OrderByDescending(x => x.FavoriteCount + x.ViewCount)
+            .Select(y => new GetLatestProjectResponse(
+                y.Id,
+                y.Domain.Name,
+                y.Title,
+                y.ProjectYear,
+                y.User.FullName,
+                y.FavoriteCount,
+                y.ViewCount)
+            )
+            .Take(5)
+            .ToListAsync();
+       
+        return Ok(popular);
     }
 }
