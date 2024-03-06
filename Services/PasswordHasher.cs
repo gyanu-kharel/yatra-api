@@ -21,7 +21,7 @@ public class PasswordHasher : IPasswordHasher
         
         return (Convert.ToHexString(hash), Convert.ToHexString(salt));
     }
-
+ 
     public bool VerifyPassword(string hashedPassword, string checkPassword, string salt)
     {
         var hashToCompare = Rfc2898DeriveBytes.Pbkdf2(

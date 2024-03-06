@@ -11,7 +11,7 @@ public static class MLHelper
         // Split the description into words
         string[] words = description.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
 
-        List<string> result = [];
+        List<string> result = []; 
 
         foreach (var keyword in keywords)
         {
@@ -68,7 +68,7 @@ public static class MLHelper
         var vectorA = keywordsA.Select(k => keywordsB.Contains(k) ? 1 : 0).ToArray();
         var vectorB = keywordsB.Select(k => keywordsA.Contains(k) ? 1 : 0).ToArray();
 
-        // Calculate dot product
+        // Calculate dot product 
         double dotProduct = DotProduct(vectorA, vectorB);
 
         // Calculate magnitudes

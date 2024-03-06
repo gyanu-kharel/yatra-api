@@ -38,7 +38,7 @@ public class ProjectsController(ApplicationDbContext dbContext, IJwtTokenGenerat
             )
             .ToListAsync();
 
-        var userFavs = await dbContext.UserFavorites
+        var userFavs = await dbContext.UserFavorites//
             .Where(x => x.UserId == userId)
             .Select(y => y.ProjectId)
             .ToListAsync();
@@ -236,5 +236,34 @@ public class ProjectsController(ApplicationDbContext dbContext, IJwtTokenGenerat
             .ToListAsync();
        
         return Ok(popular);
+
+    }
+    [HttpGet("[action]")]
+    public async Task<IActionResult> GetAllForUser()
+    {
+         var token =  Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        if (token is null)
+            return BadRequest();
+
+        var userId = jwtTokenGenerator.ParseToken(token);
+        
+        var projects = await dbContext.Projects
+            .Where (x => x.UserId == userId )
+            .Select(x => new GetProjectResponse(
+                    x.Id,
+                    x.Title,
+                    x.Description,
+                    x.Domain.Name,
+                    x.Duration,
+                    x.TeamSize,
+                    x.SkillLevel,
+                    x.Complexity,
+                    x.FavoriteCount,
+                    x.ViewCount,
+                    null
+                )
+            )
+            .ToListAsync();
+        return Ok(projects);
     }
 }
